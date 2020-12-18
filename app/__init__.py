@@ -13,7 +13,7 @@ from random import random
 from datetime import datetime
 
 #________________________________________________________________________________________
-flag_model = False
+flag_model = True
 #________________________________________________________________________________________
 
 path_= os.path.dirname(os.path.dirname(__file__))
@@ -37,7 +37,7 @@ else:
 
 
 if flag_model:
-    from models.bertolet import IsTrollClassifierModel
+    from models.trolldetector import IsTrollClassifierModel
     from binary_class_results_interpretation.explainResultsToHTML import ExplainResultsToHTML
 
 from parsers.otvetmailparser import get_question_answers
