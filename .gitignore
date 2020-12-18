@@ -25,3 +25,5 @@ model/bert/*
 parsers/__pycache__
 parsers/__pycache__/
 parsers/__pycache__/*
+
+app/tempates/single_plot.html
