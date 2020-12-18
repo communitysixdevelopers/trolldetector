@@ -7,7 +7,7 @@ from os import remove
 def open_browser():
       webbrowser.open_new_tab("http://localhost:5000/")
 
-START_BROWSER = True
+START_BROWSER = False
 
 if __name__ == "__main__":
       if START_BROWSER:
@@ -15,7 +15,7 @@ if __name__ == "__main__":
       # Model warmup (ускоряет первый запуск)
       MODEL.predict(question="Вопрос", answer="Ответ")
       # Запуск базового сервера
-      app_web.run()
+      app_web.run(host="0.0.0.0")
       #manager.run()
       """
       manager.run()
