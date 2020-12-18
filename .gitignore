@@ -4,3 +4,7 @@ binary_class_results_interpretation/__pycache__
 binary_class_results_interpretation/__pycache__/*
 app/__pycache__
 app/__pycache__/*
+logs/
+logs/*
+models/__pycache__
+models/__pycache__/*
