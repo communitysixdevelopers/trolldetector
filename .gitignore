@@ -30,6 +30,7 @@ parsers/__pycache__
 parsers/__pycache__/
 parsers/__pycache__/*
 
-./app/tempates/single_plot.html
-./app/templates/table.html
-./app/templates/table_history.html
+app/templates/single_plot.html
+app/templates/table.html
+app/templates/table_history.html
+app/models/__pycache__/create_html_table.cpython-38.pyc
