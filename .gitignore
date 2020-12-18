@@ -6,6 +6,10 @@ app/__pycache__
 app/__pycache__/
 app/__pycache__/*
 
+app/models/__pycache__
+app/models/__pycache__/
+app/models/__pycache__/*
+
 binary_class_results_interpretation/__pycache__
 binary_class_results_interpretation/__pycache__/
 binary_class_results_interpretation/__pycache__/*
