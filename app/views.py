@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import request, render_template, make_response, jsonify
-from app import app_web, MODEL, interpretation, get_question_answers, TABLE, TABLE_HISTORY, db, ApiInformation
+from app import app_web, MODEL, interpretation, get_question_answers, TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation
+from datetime import datetime 
 
 FLAG_TABLE_LINK = -3
 FLAG_TABLE_HISTORY = 0
@@ -232,7 +233,7 @@ def q_a():
         result["answer"] = request.form.get("answer")
         result["proba"] = MODEL.predict(result["question"],result["answer"])
         result["smile"] = get_list_pictures(result["proba"])
-        TABLE_HISTORY.add_row([result["question"], result["answer"], result["proba"]])
+        TABLE_HISTORY.add_row([result["question"], result["answer"], result["proba"], datetime.today().strftime("%Y-%m-%d_%H.%M.%S")])
         TABLE_HISTORY.save_html(path='app/templates/table_history.html')
     return render_template("index_question_answer.html", result=result)
 
@@ -242,12 +243,13 @@ def link():
     global FLAG_TABLE_LINK
     global FLAG_TABLE_HISTORY
     link_to_site = preprocess_link_answers_mail_ru(request.args.get("link_to_site"))
+    print(link_to_site)
     data = parce_data_from_link_answers_mail_ru(link_to_site)
     if data["code"] == -3:
         return render_template("index_link.html")
     LINK_COMMENT = data["comment"]
     FLAG_TABLE_LINK = data["code"]
-    print(FLAG_TABLE_LINK)
+
     if data["code"] < 0:
         return render_template("index_link.html")
     FLAG_TABLE_HISTORY = 1
@@ -255,7 +257,7 @@ def link():
     for answer in data["answer"]:
         proba = MODEL.predict(data["question"], answer)
         TABLE.add_row([data["question"], answer, proba])
-        TABLE_HISTORY.add_row([data["question"], answer, proba])
+        TABLE_HISTORY.add_row([data["question"], answer, proba, datetime.today().strftime("%Y-%m-%d_%H.%M.%S")])
     TABLE.save_html(path='app/templates/table.html')
     TABLE_HISTORY.save_html(path='app/templates/table_history.html')
     return render_template("index_link.html")
@@ -317,11 +319,30 @@ def frame_interpretation():
     result = {}
     result["question"] = ""
     result["answer"] = ""
+    if request.method == "POST":
+        result = request.get_json()
     return render_template("form_interpretation.html", result=result)
 
-@app_web.route("/single_plot/", methods=['GET', 'POST']) 
+@app_web.route("/single_plot/", methods=['GET']) 
 def single_plot():
     return render_template("single_plot.html")
+
+@app_web.route("/table_top/", methods=['GET']) 
+def table_top():
+    global TABLE_INTERP_TOP
+    return TABLE_INTERP_TOP.get_html(table_id="table_top", class_table="table_top")
+
+@app_web.route("/draw_pos/", methods=['GET']) 
+def draw_pos():
+    return render_template("Позитивный.html")
+
+@app_web.route("/top_pos/", methods=['GET']) 
+def top_pos():
+    return render_template("table_interpretation_top_pos.html")
+
+@app_web.route("/top_neg/", methods=['GET']) 
+def top_neg():
+    return render_template("table_interpretation_top_neg.html")
 
 @app_web.route("/form_interpretation/", methods=['GET', 'POST']) 
 def form_interpretation():
@@ -343,4 +364,5 @@ def table_history():
 
 @app_web.route("/table_interpretation/", methods=['GET', 'POST']) 
 def table_interpretation():
-    return render_template("table_interpretation.html")
+    global TABLE_INTERP
+    return TABLE_INTERP.get_html(table_id="table_interp")

@@ -10,6 +10,9 @@ import shap
 import matplotlib.pyplot as plt
 import numpy as np
 import operator
+import matplotlib
+
+from collections import OrderedDict
 
 class ExplainResultsToHTML():
     '''
@@ -23,17 +26,24 @@ class ExplainResultsToHTML():
         model type like 'linear'', 'tree-based' or 'neural-net'
     is_proba: bool
         flag for return probabilities on plot or raw SHAP-values
+    is_proba:
+        flag for return probabilities on plot or raw SHAP-values
     scaler:
         scaler for inverse features values on plot (default None)
     
     Methods
     -------
-    __explainer()
-        Creation explainer
-    __shap_values(X_test)
-        Calculation SHAP values
     single_plot()
         Plot individual SHAP value for observation and save as .html
+    summary_plot
+        Summary plot SHAP value for features and save as .jpeg
+    get_impact_of_n_max_shap_values
+        Return impact of each top n_max features and other features
+    pie_plot_impacts_by_classes
+        Plot pie charts of impact features in two classes
+    pie_plot_summary_impacts
+        Plot pie charts of summary impact of features
+        
     '''
 
     def __init__(self, model, X_train, model_type, is_proba, scaler=None):
@@ -113,7 +123,7 @@ class ExplainResultsToHTML():
         shap.save_html(path_save, single_plot)
     
     
-    def summary_plot(self, features_list, X_test, path_save="summary_plot.html", is_bar=False):
+    def summary_plot(self, features_list, X_test, max_display, path_save="summary_plot.html", is_bar=False):
         '''
         Summary plot SHAP value for features and save as .jpeg
         
@@ -129,7 +139,7 @@ class ExplainResultsToHTML():
         plot_type = 'bar'if is_bar else 'dot'
         summary_plot = shap.summary_plot(self.__shap_values(X_test),
                                          X_test,
-                                         max_display=len(features_list),
+                                         max_display=max_display,
                                          feature_names=features_list,
                                          plot_type=plot_type,
                                          show=False,
@@ -137,14 +147,13 @@ class ExplainResultsToHTML():
         plt.savefig('summary_plot.jpeg', bbox_inches='tight')
 
 
-    def get_impact_of_n_max_shap_values(self, one_row, features_list, n_max, is_pos):
+    def get_impact_of_n_max_shap_values(self, test_data, features_list, n_max, is_pos):
         '''
-        Get impact of each top n_max features in percent
-        of impact of all features on positive and negative classes 
+        Return impact of each top n_max features and other features
         
         Parameters
         ----------
-        one_row : numpy.ndarray
+        test_data : numpy.ndarray
             one test data example
         features_list : list
             list of features names
@@ -153,24 +162,154 @@ class ExplainResultsToHTML():
         is_pos : bool
             positive or negative class
         '''
-        shap = self.__shap_values(one_row)
+        if test_data.ndim == 1:
+            shap = self.__shap_values(test_data)
+        else:
+            shap = self.__shap_values(test_data).mean(0)
         shap_dict = dict(zip(features_list,
                              shap,
                              ),
                          )
         shap_pos_sum = np.sum(shap[np.where(shap > 0)])
         shap_neg_sum = np.sum(shap[np.where(shap < 0)])
-        
         shap_dict_pos = {}
         shap_dict_neg = {}
-        
         for key, value in shap_dict.items():
             if shap_dict[key] > 0:
                 shap_dict_pos.update({key: value / shap_pos_sum})
             if shap_dict[key] < 0:
                 shap_dict_neg.update({key: value / shap_neg_sum})
         if is_pos:
-            return dict(sorted(shap_dict_pos.items(), key = operator.itemgetter(1), reverse=True)[:n_max])
+            other_sum = sum(dict(sorted(shap_dict_pos.items(), key = operator.itemgetter(1), reverse=True)[n_max:]).values())
+            dict_ = dict(sorted(shap_dict_pos.items(), key = operator.itemgetter(1), reverse=True)[:n_max])
+            dict_['Остальное'] = other_sum
+            return dict(sorted(dict_.items(), key = operator.itemgetter(1), reverse=True))
         else:
-            return dict(sorted(shap_dict_neg.items(), key = operator.itemgetter(1), reverse=True)[:n_max])
+            other_sum = sum(dict(sorted(shap_dict_neg.items(), key = operator.itemgetter(1), reverse=True)[n_max:]).values())
+            dict_ = dict(sorted(shap_dict_neg.items(), key = operator.itemgetter(1), reverse=True)[:n_max])
+            dict_['Остальное'] = other_sum
+            return dict(sorted(dict_.items(), key = operator.itemgetter(1), reverse=True))
+    
+    
+    def pie_plot_impacts_by_classes(self, pos_imp, neg_imp, show_pics=True, save_pics=True, path_save="", dpi_pic=100):
+        '''
+        Plot pie charts of impact features in two classes
+        
+        Parameters
+        ----------
+        pos_imp : dict
+            dict with feature as key and value as impact 
+        neg_imp : dict
+            number of most important features
+        '''
+        figsize = (10, 10)
+        #Positive pie chart plot
+        labels = list(pos_imp.keys())
+        sizes = list(pos_imp.values())
+        other_explode_ind = list(OrderedDict(pos_imp).keys()).index('Остальное')
+        explode = [0.05] * (len(labels) - 1)
+        explode.insert(other_explode_ind, 0.15)
+        cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["#ff0d57", "#f2f2f2"])
+        colors = cmap(np.linspace(0., 1., len(sizes)))
+        plt.figure(figsize=figsize)
+        plt.pie(sizes,
+               explode=explode,
+               labels=labels,
+               autopct='%1.1f%%',
+               shadow=True,
+               colors=colors,
+               startangle=90,
+               pctdistance=0.8,
+               )
+        centre_circle = plt.Circle((0, 0),
+                                    0.70,
+                                    fc='white',
+                                    )
+        fig = plt.gcf()
+        fig.gca().add_artist(centre_circle)
+        plt.tight_layout()
+        if save_pics:
+            plt.savefig(path_save+'pos.png', dpi=dpi_pic, bbox_inches='tight')
+        if show_pics:
+            plt.show()
+        # Negative pie chart plot
+        labels = list(neg_imp.keys())
+        sizes = list(neg_imp.values())
+        other_explode_ind = list(OrderedDict(neg_imp).keys()).index('Остальное')
+        explode = [0.05] * (len(labels) - 1)
+        explode.insert(other_explode_ind, 0.15)
+        cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["#1e88e5", "#f2f2f2"])
+        colors = cmap(np.linspace(0., 1., len(sizes)))
+        plt.figure(figsize=figsize)
+        plt.pie(sizes,
+               explode=explode,
+               labels=labels,
+               autopct='%1.1f%%',
+               shadow=True,
+               colors=colors,
+               startangle=90,
+               pctdistance=0.8,
+               )
+        centre_circle = plt.Circle((0, 0),
+                                    0.70,
+                                    fc='white',
+                                    )
+        fig = plt.gcf()
+        fig.gca().add_artist(centre_circle)
+        plt.tight_layout()
+        if save_pics:
+            plt.savefig(path_save+'neg.png', dpi=dpi_pic, bbox_inches='tight')
+        if show_pics:
+            plt.show()
+        
+        
+    def pie_plot_summary_impacts(self, test_data, features_list, n_max=5):
+        '''
+        Plot pie charts of summary impact of features
+        
+        Parameters
+        ----------
+        test_data : numpy.ndarray
+            test data
+        features_list : dict
+             list of features names
+        n_max : int
+            number of most important features
+        '''
+        figsize = (10, 10)
+        vals = np.abs( self.__shap_values(test_data)).mean(0)
+        feature_importance = dict(zip(features_list, vals))
+        feature_importance_ = {}
+        for key, value in feature_importance.items():
+            feature_importance_.update({key: value / np.sum(vals)})
+        p_list = sorted(feature_importance_.items(), key = operator.itemgetter(1), reverse=True)
+        p_dict_n_max = dict(p_list[:n_max])
+        p_dict_n_max['Остальное'] = sum(dict(p_list[n_max:]).values())
+        d = dict(sorted(p_dict_n_max.items(), key=operator.itemgetter(1), reverse=True))
+        labels = list(d.keys())
+        sizes = list(d.values())
+        other_explode_ind = list(OrderedDict(d).keys()).index('Остальное')
+        explode = [0.05] * (len(labels) - 1)
+        explode.insert(other_explode_ind, 0.15)
+        cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["#4f9b17", "#f2f2f2"])
+        colors = cmap(np.linspace(0., 1., len(sizes)))
+        plt.figure(figsize=figsize)
+        plt.pie(sizes,
+               explode=explode,
+               labels=labels,
+               autopct='%1.1f%%',
+               shadow=True,
+               colors=colors,
+               startangle=90,
+               pctdistance=0.8,
+               )
+        centre_circle = plt.Circle((0, 0),
+                                    0.70,
+                                    fc='white',
+                                    )
+        fig = plt.gcf()
+        fig.gca().add_artist(centre_circle)
+        plt.tight_layout()
+        plt.savefig('pie_all_impact.png', dpi=100, bbox_inches='tight')
+        plt.show()
         

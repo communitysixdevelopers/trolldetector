@@ -2,10 +2,12 @@ html {
 	height: 100%;
 	margin: 0;
 	/*background-color:#6bb67b;*/
-	background-image: url("pic/fon.svg");
-	background-size: 100%;
 }
 
+html.back_image {
+	background: url("pic/fon.svg") repeat;
+	background-size: 100%;
+}
 /*.picture_fon {
 	background-image: url("pic/fon.svg");
 	background-size: 100%;
@@ -13,7 +15,7 @@ html {
 */
 body {
 	color: #000000;
-	font: 14px 'MyriadPro';
+	font: 16px 'MyriadPro';
 	/*background-image: url("pic/fon.jpg");*/
 	/*background-color: #040c0c;*/
 	/*border: 1px solid #5a5a5a;*/
@@ -27,11 +29,16 @@ body {
 .content {
 	background-color: #fff;
 	border-radius: 20px;
-	margin-left: 20%;
-	margin-right: 20%;
+	margin-left: 15%;
+	margin-right: 15%;
 	padding-bottom: 10px;
 }
-
+.head_aut {
+	background-color: #fff;
+	border-radius: 20px;
+	padding-bottom: 10px;
+	margin-left: 85%;
+}
 .content_form {
 	background-color: #fff;
 	border-radius: 20px;
@@ -75,7 +82,7 @@ h1.name_service {
 	padding-top: 3%;
 	color: #fff;
 	text-align: center;
-	font: 32px 'Gilroy';
+	font: 30px 'Gilroy';
 	letter-spacing: 0.1em
 }
 

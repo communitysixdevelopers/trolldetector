@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="back_image">
 	<head>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="../static/style_fonts.css" type="text/css">
@@ -23,7 +23,16 @@
 			</nav>
 			<br>
 				<form name="search" action="/link/" method="get">
+					<label for="type_site">Портал:</label>
+					<select style="height: 32px;" id="select_site" name="type_site" form="search">
+						<option value="answers_mail.ru">Ответы Mail.ru</option>
+						<option value="yandex_q" disabled>Яндекс Q</option>
+						<option value="thequestion.ru" disabled>The Question</option>
+						<option value="qna.habr.com" disabled>Хабр Q&A</option>
+						<option value="sprosi.xyz" disabled>Спроси.xyz</option>
+					</select>
 					<input class="link"
+					autofocus
 					required 
 					type="text" 
 					name="link_to_site"
@@ -36,7 +45,7 @@
 			<iframe 
 				style="border: 0px; width: 100%"
 				src="/table_proba/"
-				height="500">
+				height="600">
 			</iframe>
 		</div>
 		<footer></footer>
