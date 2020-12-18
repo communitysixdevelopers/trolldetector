@@ -835,7 +835,7 @@ class IsBest:
         output_dim = 1
         self.model = IsBestClassifier(embedding_dim, hidden_dim, output_dim)
         self.model.load_state_dict(
-            torch.load(os.path.join(load_path, "is_best.pt"))
+            torch.load(os.path.join(load_path, "is_best.pt"), map_location=self.device)
         )
         self.model.to(self.device)
         self.model.eval()
