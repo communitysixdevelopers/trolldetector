@@ -6,4 +6,4 @@ For start train whole model you need:
 
 Now you can run trolldetector.py with flag -m/--mode "fit" for train low-level-classifieres, final troll classifiers and save it trained params.
 
-Also flag -m/--mode can "load" or "predict". If flag "predict", model wait while you input question and answer with "[SEP]" token beetween.
+Also flag -m/--mode can "load" or "predict". If flag "predict", model wait while you print question and answer with "[SEP]" token beetween.
