@@ -40,29 +40,6 @@ from models.istroll import IsTroll, FeatureExtractor
 from utils import Embedder, log, binary_balance
 
 
-# features name wich extracted by low-level classifiers for summary dataset
-FEATURES_NAME = [
-    "q_toxic", "q_abs_neg", "q_neg", "q_neutral", "q_pos", "q_abs_pos",
-    "q_threat", "q_wc", "q_cc", "q_wl", "q_swc", "q_dg", "q_twc", "q_urlc",
-    "q_ec", "q_emb",
-
-    "a_toxic", "a_abs_neg", "a_neg", "a_neutral", "a_pos", "a_abs_pos",
-    "a_threat", "a_wc", "a_cc", "a_wl", "a_swc", "a_dg", "a_twc", "a_urlc",
-    "a_ec", "a_emb",
-
-    "cos_sim", "is_joke", "is_useful"
-]
-# features name wich extracted by low-level classifiers for tweet dataset
-# FEATURES_NAME = [
-#     "q_toxic", "q_neg", "q_threat", "q_wc", "q_cc", "q_wl", "q_swc", "q_dg",
-#     "q_twc", "q_urlc", "q_ec", "q_emb",
-
-#     "a_toxic", "a_neg", "a_threat", "a_wc", "a_cc", "a_wl", "a_swc", "a_dg",
-#     "a_twc", "a_urlc", "a_ec", "a_emb",
-
-#     "cos_sim", "is_joke", "is_useful"
-# ]
-
 TOKENIZER = "DeepPavlov/rubert-base-cased-conversational"
 EMBEDDER = "DeepPavlov/rubert-base-cased-conversational"
 
@@ -250,7 +227,7 @@ def _create_troll_features_extractor(low_level_extractors):
         IsPositiveCatboost(verbose=False),
         IsThreat(iterations=1000),
     ]
-    not_trainable = [TextStatistics()]  # NamedEntities()]
+    not_trainable = [TextStatistics()]
     concat_trainable = [
         IsJoke(
             penalty='l2', tol=1e-4, C=0.5, solver='saga', random_state=42,
@@ -317,8 +294,6 @@ class IsTrollClassifierModel:
         self._loger = getLogger("logger.IsTrollClassifierModel")
         self._train_dataset = train_dataset
         self._embedder = self._load_embedder(embedder)
-        # process_neg_psos_tweet process_comment_summary_min, process_comment_summary_max, process_comment_summary_mean
-        # process_best.csv
         self._datasets_name = [
             "process_big_toxic_balance.csv", "process_comment_summary.csv",
             "process_threat.csv", "process_joke.csv", "process_best.csv"
