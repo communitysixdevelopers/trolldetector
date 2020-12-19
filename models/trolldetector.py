@@ -640,10 +640,49 @@ class IsTrollClassifierModel:
         return self._is_troll
 
 
-if __name__ == "__main__":
+def _get_argparser():
+    """Create argument parser."""
+    description = "TrollDetectorModel arguments parser."
+    parser = ArgumentParser(
+        prog="Parser for set up work mode.", description=description,
+        formatter_class=ArgumentDefaultsHelpFormatter
+    )
+    return parser
+
+
+def _setup_parser(parser):
+    """Create command line arguments."""
+    parser.add_argument(
+        "-m", "--mode", dest="mode", type=str,
+        choices=["train", "load", "predict"],
+        required=True, help="Set up work mode."
+    )
+
+
+def play_with_detector(args):
     obj = IsTrollClassifierModel()
-    # obj.load_or_fit()
-    # obj.save()
-    # print(obj.fit())
-    # obj.save()
-    print(obj.predict("Сколько весит Земля?", "Вес Земли примерно 1000000 тонн"))
+    if args.mode == "train":
+        print(obj.fit())
+    elif args.mode == "load":
+        print(obj.load_or_fit())
+    else:
+        question_answer = input()
+        question, answer = question_answer.split("[SEP]")
+        print(obj.predict(question, answer))
+    obj.save()
+
+
+def run():
+    """
+    Start programm.
+
+    Entrance to troll detector. Create argparser. Setup it. Get args and start.
+    """
+    parser = _get_argparser()
+    _setup_parser(parser)
+    args = parser.parse_args()
+    play_with_detector(args)
+
+
+if __name__ == "__main__":
+    run()
