@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import request, render_template, make_response, jsonify
-from app import app_web, MODEL, interpretation, get_question_answers, TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation
+from app import app_web, MODEL, interpretation, get_question_answers, interpretation_short, TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation
 from datetime import datetime 
 
 FLAG_TABLE_LINK = -3
@@ -34,8 +34,8 @@ def predict_class(proba, treshold=0.5):
         return 1
     return 0
 
-def update_cell_sql(cell, new_value):
-    cell = new_value
+# def update_cell_sql(cell, new_value):
+#     cell = new_value
 
 
 def process_dict_from_proba(dict_data, update_db_proba=True, data_api=None):
@@ -180,6 +180,54 @@ def process_dict_from_link(dict_data, update_db_link=True):
                                                  "interpretation":data_api.counts_interpr_left
     }
 
+def process_dict_from_interpretation(dict_data):
+    """
+        Обработчик входного словаря. Интерпретация
+    """
+    comment = None
+    #Проверка правильности формирования запроса
+    if dict_data == {}:
+        comment = "No found required keys: 'question', 'answer'."
+    elif "question" not in dict_data.keys():
+        comment = "No found required key: 'question."
+    elif "answer" not in dict_data.keys():
+        comment = "No found required key: 'answer'."
+    
+    dict_data["log"] = {"comment":comment}
+    if comment != None:
+        return
+
+    dict_data["log"] = {}
+    #Проверка api ключа
+    data_api = db.session.query(ApiInformation).get(dict_data["key_api"])
+    if data_api is None:
+        dict_data["log"]["comment"] = "No correct api_key, or unauthorized user"
+        return
+    elif data_api.counts_interpr_left == 0:
+        dict_data["log"]["comment"] = "No available query interpretation"
+        return
+
+    neg, pos = interpretation_short(dict_data["question"], dict_data["answer"], dict_data["n_max_top"])
+
+    for key, value in neg.items():
+        neg[key] = round(value,3)
+    for key, value in pos.items():
+        pos[key] = round(value,3)
+
+    dict_data["negative_contribution"] = neg
+    dict_data["positive_contribution"] = pos
+
+    #Запись изменений в базу данных
+    data_api.counts_interpr_left -= 1
+    db.session.add(data_api)
+    db.session.commit()
+
+    dict_data["log"]["count_available_query"] = {"probabylity":data_api.counts_proba_left,
+                                                 "link":data_api.counts_link_left,
+                                                 "interpretation":data_api.counts_interpr_left
+    }
+
+
 def preprocess_link_answers_mail_ru(link_to_site):
     """
         Обработчик входной ссылки на сайт Mail.ru
@@ -304,12 +352,21 @@ def catch_link():
     process_dict_from_link(data)
     return jsonify(data)
 
-@app_web.route("/get_query_left/", methods=['POST']) 
+@app_web.route("/get_interpretation/", methods=['POST']) 
+def get_interpretation():
+    data = request.get_json()
+    process_dict_from_interpretation(data)
+    return jsonify(data)
+
+@app_web.route("/get_user_api_status/", methods=['POST']) 
 def query_left():
     data = request.get_json()
     data_api = db.session.query(ApiInformation).get(data["key_api"])
-    response = data_api.json()
-    return jsonify(response)
+    data["tarif"] = data_api.tarif
+    data["counts_proba_left"] = data_api.counts_proba_left
+    data["counts_link_left"] = data_api.counts_link_left
+    data["counts_interpr_left"] = data_api.counts_interpr_left
+    return jsonify(data)
 
 """
 Other Querry

@@ -235,8 +235,7 @@ if flag_model:
             #                                 class_table="table_top")
         return neg, pos
         
-        
-    def interpretation(question, answer, solve_graf=True):
+    def interpretation_short(question, answer, n_max_top=5):
         qa_emb = EMBEDDER.encode(" ".join((question, answer)))
         q_emb = EMBEDDER.encode(question)
         a_emb = EMBEDDER.encode(answer)
@@ -244,18 +243,28 @@ if flag_model:
             question, q_emb, answer, a_emb, qa_emb
         )
         feature_scale = IS_TROLL.scaler.transform(features)
-        EXPL.single_plot(
-            FEATURES_NAME,
-            feature_scale,
-            path_save="app/templates/single_plot.html")
-        
-        interpretation_top(feature_scale[0], MAX_TOP_IMPACT)
+        return interpretation_top(feature_scale[0], n_max_top,  draw_table=False, draw_pics=False)
 
-        average_features = round_(FEATURES_TROLL.mean(axis=0), 4)
-        round_features = round_(features[0], 4)
-        TABLE_INTERP.clear_table()
-        for i, name_feature in enumerate(FEATURES_NAME):
-            TABLE_INTERP.add_row([name_feature, FEATURES_NAME_FULL[i], round_features[i], average_features[i]])
+    def interpretation(question, answer, solve_plot=True, solve_table=True):
+        qa_emb = EMBEDDER.encode(" ".join((question, answer)))
+        q_emb = EMBEDDER.encode(question)
+        a_emb = EMBEDDER.encode(answer)
+        features = EXTRACTOR.create_features(
+            question, q_emb, answer, a_emb, qa_emb
+        )
+        feature_scale = IS_TROLL.scaler.transform(features)
+        interpretation_top(feature_scale[0], MAX_TOP_IMPACT)
+        if solve_plot:
+            EXPL.single_plot(
+                FEATURES_NAME,
+                feature_scale,
+                path_save="app/templates/single_plot.html")
+        if solve_table:
+            average_features = round_(FEATURES_TROLL.mean(axis=0), 4)
+            round_features = round_(features[0], 4)
+            TABLE_INTERP.clear_table()
+            for i, name_feature in enumerate(FEATURES_NAME):
+                TABLE_INTERP.add_row([name_feature, FEATURES_NAME_FULL[i], round_features[i], average_features[i]])
         # TABLE_INTERP.save_html(path="app/templates/table_interpretation.html")
 
 else:
