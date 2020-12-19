@@ -317,7 +317,7 @@ class PreprocessText:
 
     """
 
-    def __init__(self, tokenizer_or_name_or_path, max_length, clean=True):
+    def __init__(self, tokenizer_or_name_or_path, max_length, clean):
         """Create class objects."""
         tqdm.pandas()
         self.tokenizer = tokenizer_or_name_or_path
