@@ -1,6 +1,5 @@
 #!/bin/bash
 python finetune.py -lmn bert -smn bert_ft.pt -smp bert_fine_tune -ptrd datasets/process_text.csv -lr 3e-4 -wd 0.01 -bs 4
-# python finetune.py -lmn "DeepPavlov/rubert-base-cased-conversational" -smn bert_ft.pt -smp bert_fine_tune -ptrd datasets/process_text.csv -lr 3e-4 -wd 0.01 -bs 4
 sleep 1s
 python finetune.py -lmn bert_ft.pt -lmp bert_fine_tune -smn bert_ft.pt -smp bert_fine_tune -ptrd datasets/process_neg_pos_tweet.csv -lr 3e-4 -wd 0.01 -bs 32 -e 1
 sleep 1s
