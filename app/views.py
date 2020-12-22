@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import request, render_template, make_response, jsonify
-from app import app_web, MODEL, interpretation, get_question_answers, interpretation_short, TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation
+from app import app_web, MODEL, interpretation, get_question_answers, interpretation_short, \
+    TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation, Users, login_required, login_user, current_user
 from datetime import datetime 
 
 FLAG_TABLE_LINK = -3
@@ -33,10 +34,6 @@ def predict_class(proba, treshold=0.5):
     if proba >= treshold:
         return 1
     return 0
-
-# def update_cell_sql(cell, new_value):
-#     cell = new_value
-
 
 def process_dict_from_proba(dict_data, update_db_proba=True, data_api=None):
     """
@@ -265,11 +262,31 @@ def parce_data_from_link_answers_mail_ru(link_to_site):
 """
 Main pages
 """
-@app_web.route("/", methods=['GET', 'POST']) 
+@app_web.route("/", methods=['GET', 'POST'])
 def index():
+    if request.method == "POST":
+        print(request.form.get("email"))
+        print(request.form.get("password"))
     return render_template("index.html")
 
-@app_web.route("/q_a/", methods=['GET', 'POST']) 
+@app_web.route("/registration/", methods=['GET', 'POST'])
+def registration():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        password_copy = request.form.get("password_copy")
+        if password_copy != password:
+            return render_template("registration.html", info="Пароли не совпадают")
+        user = Users(email=email,  password='password')
+        # user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        return render_template("index.html")
+    return render_template("registration.html", info="")
+
+
+@app_web.route("/q_a/", methods=['GET', 'POST'])
+@login_required
 def q_a():
     global FLAG_TABLE_HISTORY
     result = {}
@@ -285,7 +302,8 @@ def q_a():
         TABLE_HISTORY.save_html(path='app/templates/table_history.html')
     return render_template("index_question_answer.html", result=result)
 
-@app_web.route("/link/", methods=['GET', 'POST']) 
+@app_web.route("/link/", methods=['GET', 'POST'])
+@login_required
 def link():
     global LINK_COMMENT
     global FLAG_TABLE_LINK
@@ -310,7 +328,8 @@ def link():
     TABLE_HISTORY.save_html(path='app/templates/table_history.html')
     return render_template("index_link.html")
 
-@app_web.route("/interpretation/", methods=['GET', 'POST']) 
+@app_web.route("/interpretation/", methods=['GET', 'POST'])
+@login_required
 def interpr():
     result = {}
     result["question"] = ""
@@ -321,11 +340,13 @@ def interpr():
         interpretation(result["question"], result["answer"])
     return render_template("index_interpretation.html", result=result)
 
-@app_web.route("/service/", methods=['GET', 'POST']) 
+@app_web.route("/service/", methods=['GET', 'POST'])
+@login_required
 def service():
     return render_template("index_service.html")
 
-@app_web.route("/history/", methods=['GET', 'POST']) 
+@app_web.route("/history/", methods=['GET', 'POST'])
+@login_required 
 def history():
     return render_template("index_history.html")
 

@@ -36,9 +36,20 @@ body {
 .head_aut {
 	background-color: #fff;
 	border-radius: 20px;
-	padding-bottom: 10px;
-	margin-left: 85%;
 }
+
+.head_aut a {
+	color:  #000;
+	text-decoration: none;
+	font-size: 18px;
+}
+.head_aut a:hover {
+	padding: 10px 10px 2px 10px;
+	/* background: radial-gradient(circle farthest-side at center bottom,#6bb67b83, #ffffff00); */
+	/* border-radius: 20px; */
+	text-decoration: underline;
+}
+
 .content_form {
 	background-color: #fff;
 	border-radius: 20px;

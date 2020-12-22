@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 from flask import Flask
 from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_required, login_user, current_user
 import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import os
 import sys
@@ -51,11 +53,16 @@ app_web.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:'+base_slash+\
     os.path.join(path_, 'app', 'database','database.db')
 
 manager = Manager(app_web)
+login_manager = LoginManager(app_web)
+login_manager.login_view = '/'
+
+# База данных
+# _________________________________________________________________________________________
 db = SQLAlchemy(app_web)
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = 'users'
-    id = db.Column(db.BigInteger(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(), nullable=False)
     password = db.Column(db.String(), nullable=False)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
@@ -68,11 +75,16 @@ class Users(db.Model):
 	    return "<{}:{}>".format(self.id,  self.email)
 
     def set_password(self, password):
-        self.password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
+        self.password = generate_password_hash(password)
+        # self.password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
     def check_password(self,  password):
-        return bcrypt.checkpw(password, self.password_hash)
+        return check_password_hash(self.password, password)
+        #  return bcrypt.checkpw(password.encode(), self.password)
 
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(Users).get(id)
 
 class ApiInformation(db.Model):
     __tablename__ = 'api_information'
@@ -121,7 +133,7 @@ class AllHystory(db.Model):
 
     def __repr__(self):
 	    return "<{}:{}>".format(self.id,  self.question[:20])
-
+# _________________________________________________________________________________________
 db.create_all()
 
 TABLE = Table()
