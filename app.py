@@ -7,7 +7,7 @@ from os import remove
 def open_browser():
       webbrowser.open_new_tab("http://localhost:5000/")
 
-START_BROWSER = False
+START_BROWSER = True
 
 if __name__ == "__main__":
       if START_BROWSER:
