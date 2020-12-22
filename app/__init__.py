@@ -274,5 +274,7 @@ else:
     MODEL = Test()
     def interpretation(question, answer):
         pass
-
+    def interpretation_short(question, answer):
+        pass
+    
 from app import views
