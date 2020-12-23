@@ -1,12 +1,40 @@
 # -*- coding: utf-8 -*-
-from flask import request, render_template, make_response, jsonify
+from flask import request, render_template, make_response, jsonify, redirect, render_template_string
 from app import app_web, MODEL, interpretation, get_question_answers, interpretation_short, \
-    TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation, Users, login_required, login_user, current_user
+    TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, TABLE_CABINET, db, ApiInformation, User, login_required, login_user, current_user, logout_user
 from datetime import datetime 
 
 FLAG_TABLE_LINK = -3
 FLAG_TABLE_HISTORY = 0
 LINK_COMMENT = ""
+
+def get_simple_table(data):
+    str_ = '''<head>
+                <meta charset="utf-8">
+                <link rel="stylesheet" type="text/css" href="../static/style_table.css"/>
+            </head>
+            <body>
+                <center>
+                <table class="table_prob">
+                    <thead>
+                        <tr style="text-align: left;">
+                        <th></th>
+                        <th>Key_api</th>
+                        <th>Тариф</th>
+                        <th>Осталось запросов вероятности</th>
+                        <th>Осталось запросов вероятности по сслыке</th>
+                        <th>Осталось запросов интерпретации</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table}
+                    </tbody>
+                </center>
+            </body>
+            '''
+    for i, api in enumerate(data):
+        str_ += "<tr><th>{}</th><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(i+1,api.api_key, api.tarif, api.counts_proba_left, api.counts_link_left, api.counts_interpr_left)
+    return str_
 
 def get_list_pictures(proba=-1):
     base_scr = [
@@ -260,14 +288,25 @@ def parce_data_from_link_answers_mail_ru(link_to_site):
         return output
     return output
 """
-Main pages
+Autorization
 """
-@app_web.route("/", methods=['GET', 'POST'])
-def index():
-    if request.method == "POST":
-        print(request.form.get("email"))
-        print(request.form.get("password"))
+@app_web.route("/guest/", methods=['GET', 'POST'])
+def guest():
+    user = db.session.query(User).filter(User.email == "guest@guest").first()
+    login_user(user)
     return render_template("index.html")
+
+@app_web.route("/autentification/", methods=["GET", "POST"])
+def autentification():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        user = db.session.query(User).filter(User.email == email).first()
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect("/")
+        return render_template("autentification.html", info="Неверные даннные по почте/паролю")
+    return render_template("autentification.html", info="")
 
 @app_web.route("/registration/", methods=['GET', 'POST'])
 def registration():
@@ -277,13 +316,30 @@ def registration():
         password_copy = request.form.get("password_copy")
         if password_copy != password:
             return render_template("registration.html", info="Пароли не совпадают")
-        user = Users(email=email,  password='password')
-        # user.set_password(password)
+        user = User(email=email,  password='password')
+        user_db = db.session.query(User).filter(User.email == email).first()
+        if user_db:
+            return render_template("registration.html", info="Пользователь по этому электроному адресу уже зарегистрирован")
+        user.set_password(password)
         db.session.add(user)
         db.session.commit()
-        return render_template("index.html")
+        login_user(user)
+        return redirect("/")
     return render_template("registration.html", info="")
 
+@app_web.route('/logout/')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
+
+"""
+Main pages
+"""
+@app_web.route("/", methods=['GET', 'POST'])
+@login_required
+def index():
+    return render_template("index.html")
 
 @app_web.route("/q_a/", methods=['GET', 'POST'])
 @login_required
@@ -350,6 +406,27 @@ def service():
 def history():
     return render_template("index_history.html")
 
+@app_web.route("/cabinet/", methods=['GET', 'POST'])
+@login_required 
+def cabinet():
+    data_user = str(current_user).split(":")
+    data_key = db.session.query(ApiInformation).filter(ApiInformation.user_id == int(data_user[0])).all()
+    if request.method == "POST":
+        api = ApiInformation(tarif="Тестовый", counts_proba_left=100, counts_link_left=25, counts_interpr_left=10, users=current_user)
+        api.create_api_key(data_user[1])
+        db.session.add(api)
+        db.session.commit()
+        return render_template("cabinet.html", info="", table="Есть информация")
+        # email = request.form.get("email")
+    if data_user[1] == "guest@guest":
+        return render_template("cabinet_guest.html")
+    if not data_key:
+        return render_template("cabinet.html", info="", table="Нет информации по токенам")
+    else:
+        return render_template_string(get_simple_table(data_key))
+        return render_template("cabinet.html", info="", table=get_simple_table(data_key))
+    return render_template("cabinet.html", info="", table="")
+
 """
 Catch Querry
 """
@@ -409,18 +486,6 @@ def single_plot():
 def table_top():
     global TABLE_INTERP_TOP
     return TABLE_INTERP_TOP.get_html(table_id="table_top", class_table="table_top")
-
-@app_web.route("/draw_pos/", methods=['GET']) 
-def draw_pos():
-    return render_template("Позитивный.html")
-
-@app_web.route("/top_pos/", methods=['GET']) 
-def top_pos():
-    return render_template("table_interpretation_top_pos.html")
-
-@app_web.route("/top_neg/", methods=['GET']) 
-def top_neg():
-    return render_template("table_interpretation_top_neg.html")
 
 @app_web.route("/form_interpretation/", methods=['GET', 'POST']) 
 def form_interpretation():

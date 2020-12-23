@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html class="back_image">
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="../static/style_fonts.css" type="text/css">
+		<link rel="stylesheet" href="../static/style_menu.css" type="text/css">
+		<link rel="stylesheet" href="../static/style.css" type="text/css">
+		<link rel="stylesheet" href="../static/style_table.css" type="text/css">
+		<title>Troll detector</title>
+		<link rel="shortcut icon" href="../static/pic/troll.png" type="image/png">
+	</head>
+	<body>
+		<header class="wrapper">
+			<h1 class="name_service">Сервис по определению троллинга<br>в ответе на вопрос</h1>
+		</header>
+		<div class="content" style="text-align: center;">
+			<nav>
+				<ul class="top-menu">
+					<li><a href="/q_a/"> Вопрос-ответ</a></li>
+					<li><a href="/link/">Поиск по ссылке</a></li>
+					<li><a href="/history/">История запросов</a></li>
+					<li><a href="/service/">О сервисе</a></li>
+					<li class="active"><a href="/cabinet/">Личный кабинет</a></li>
+				</ul>
+			</nav>
+			<br>
+			<table class="table_tarif">
+				<thead>
+					<tr style="text-align: center;">
+					  <th>Возможности тарифа</th>
+					  <th><b>Тестовый<b></th>
+					  <th><b>Базовый</b></th>
+					  <th><b>Премиум</b></th>
+					</tr>
+				  </thead>
+				  <tbody>
+					<tr>
+					  <th>Число запросов по определению вероятности</th>
+					  <td>100</td>
+					  <td>10 тыс</td>
+					  <td>неограниченно</td>
+					</tr>
+					<tr>
+					  <th>Число запросов по определению вероятности по ссылке на портал</th>
+					  <td>25</td>
+					  <td>500</td>
+					  <td>50 тыс</td>
+					</tr>
+					<tr>
+					  <th>Число запросов на интерпретирование результатов</th>
+					  <td>10</td>
+					  <td>200</td>
+					  <td>100 тыс</td>
+					</tr>
+					<tr>
+					  <th>Дополнительный функционал</th>
+					  <td>-</td>
+					  <td>тех.поддержка, базовая настройка модели</td>
+					  <td>тех.поддержка, полная настройка модели</td>
+					</tr>
+					<tr>
+					  <th>Стоимость</th>
+					  <td>бесплатно</td>
+					  <td>платно</td>
+					  <td>платно</td>
+					</tr>
+				  </tbody>
+			</table>
+			<br>{{ info }}<br>
+			<form style="padding-top: 20px;" name="tarif" action="/cabinet/" method="POST">
+				<label for="type_tarif">Тариф:</label>
+				<select style="height: 32px;" id="select_tarif" name="type_tarif" form="tarif">
+					<option value="test">Тестовый</option>
+					<option value="base">Базовый</option>
+					<option value="premium">Премиум</option>
+				</select>
+				<button class="link" type="submit">Создать токен</button>
+			</form>
+			<br>{{ table }}<br>
+			<div style="padding-top: 30px;" id="logout" class="head_aut"> 
+				<a href="/logout/">Выход</a>
+			</div>
+		</div>
+		<footer></footer>
+	</body>
+</html>

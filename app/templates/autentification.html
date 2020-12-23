@@ -22,9 +22,27 @@
 					<li><a href="/link/">Поиск по ссылке</a></li>
 					<li><a href="/history/">История запросов</a></li>
 					<li><a href="/service/">О сервисе</a></li>
-					<li><a href="/cabinet/">Личный кабинет</a></li>
 				</ul>
 			</nav>
+			<form style="padding-top:30px;" name="login" action="/autentification/" method="post">
+				<div>
+					<label style="display: block;" for="username">Email</label>
+					<input type="email" id="username" name="email">
+				</div>
+				
+				<div>
+					<label style="display: block;" for="pass">Пароль (минимум 8 символов):</label>
+					<input type="password" id="pass" name="password"
+							minlength="8" required>
+				</div>
+				<div style="padding-top: 10px;" id="div_aut" class="head_aut"> 
+					<a href="/registration/">Зарегистрироваться</a>
+				</div>
+				<div style="padding-top: 10px;" id="div_aut" class="head_aut"> 
+					<a href="/guest/">Войти как гость</a>
+				</div>
+				{{ info }}
+				<p><button name="submit">Войти</button></p>
 		</div>
 		<footer class="footer">
 			<p style="padding-left: 20px;"><a href="https://made.mail.ru"></a><img src="../static/pic/made.svg"><br>

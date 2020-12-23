@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from flask import Flask
 from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_required, login_user, current_user
+from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user
 import bcrypt
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -11,7 +11,7 @@ import os
 import sys
 from numpy import load as np_load
 from numpy import round_
-from random import random
+import random
 from datetime import datetime
 
 #________________________________________________________________________________________
@@ -54,13 +54,18 @@ app_web.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:'+base_slash+\
 
 manager = Manager(app_web)
 login_manager = LoginManager(app_web)
-login_manager.login_view = '/'
+login_manager.login_view = '/autentification/'
 
 # База данных
 # _________________________________________________________________________________________
 db = SQLAlchemy(app_web)
 
-class Users(db.Model, UserMixin):
+@login_manager.user_loader
+def load_user(user_id):
+    # print(user_id)
+    return db.session.query(User).get(user_id)
+
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(), nullable=False)
@@ -68,11 +73,11 @@ class Users(db.Model, UserMixin):
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    api = db.relationship('ApiInformation', backref='user')
-    history = db.relationship('UsersHistory', backref='user')
+    api = db.relationship('ApiInformation', backref='users')
+    history = db.relationship('UserHistory', backref='users')
 
     def __repr__(self):
-	    return "<{}:{}>".format(self.id,  self.email)
+	    return "{}:{}".format(self.id,  self.email)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -81,10 +86,6 @@ class Users(db.Model, UserMixin):
     def check_password(self,  password):
         return check_password_hash(self.password, password)
         #  return bcrypt.checkpw(password.encode(), self.password)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return db.session.query(Users).get(id)
 
 class ApiInformation(db.Model):
     __tablename__ = 'api_information'
@@ -99,17 +100,20 @@ class ApiInformation(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
     def __repr__(self):
-	    return "<{}:{}>".format(self.api_key, self.tarif)
+	    return "{}:{}".format(self.api_key, self.user_id)
 
-    def create_apy_key(self, login):
-        bcrypt.kdf(
-            password=b'key_api_login:'+login,
-            salt=b'salt',
-            desired_key_bytes=32,
-            rounds=10)
+    # def create_api_key(self, login):
+    #     str_ = 'key_api_login:'+login
+    #     return bcrypt.kdf(
+    #         password=str_.encode(),
+    #         salt=b'salt',
+    #         desired_key_bytes=32,
+    #         rounds=10)
+    def create_api_key(self, login):
+        self.api_key = str(random.randrange(0,99999999))
 
-class UsersHistory(db.Model):
-    __tablename__ = 'users_history'
+class UserHistory(db.Model):
+    __tablename__ = 'user_history'
     id = db.Column(db.BigInteger(), primary_key=True)
     question = db.Column(db.Text(), nullable=False)
     answer = db.Column(db.Text(), nullable=False)
@@ -120,11 +124,11 @@ class UsersHistory(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
     def __repr__(self):
-	    return "<{}:{}>".format(self.id,  self.question[:20])
+	    return "{}:{}".format(self.id,  self.question[:20])
 
 class AllHystory(db.Model):
     __tablename__ = 'history'
-    id = db.Column(db.BigInteger(), primary_key=True)
+    id_query = db.Column(db.BigInteger(), primary_key=True)
     question = db.Column(db.Text(), nullable=False)
     answer = db.Column(db.Text(), nullable=False)
     proba = db.Column(db.Float(), nullable=False)
@@ -132,7 +136,7 @@ class AllHystory(db.Model):
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
-	    return "<{}:{}>".format(self.id,  self.question[:20])
+	    return "{}:{}".format(self.id_query,  self.question[:20])
 # _________________________________________________________________________________________
 db.create_all()
 
@@ -140,6 +144,7 @@ TABLE = Table()
 TABLE_HISTORY = Table(columns=['Вопрос', 'Ответ', 'Вероятность','Время запроса'], max_size_rows=150, reverse_data=True)
 TABLE_INTERP = Table(columns=["Признак", "Название признака", "Значение признака", "Среднее значение по датасету"], with_dooble_click_script=False)
 TABLE_INTERP_TOP = Table(columns=["Признак", "Доля вклада","Признак", "Доля вклада"], with_dooble_click_script=False)
+TABLE_CABINET = Table(columns=["Key_api", "Осталось запросов вероятности","Осталось запросов вероятности по сслыке", "Осталось запросов интерпретации"], with_dooble_click_script=False)
 MAX_TOP_IMPACT = 5
 
 if flag_model:
@@ -282,7 +287,7 @@ if flag_model:
 else:
     class Test:
         def predict(self, question, answer):
-            return round(random(),3)
+            return round(random.random(),3)
     MODEL = Test()
     def interpretation(question, answer):
         pass
