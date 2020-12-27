@@ -24,6 +24,7 @@
 				</ul>
 			</nav>
 			<br>
+			<center>
 			<table class="table_tarif">
 				<thead>
 					<tr style="text-align: center;">
@@ -66,6 +67,7 @@
 					</tr>
 				  </tbody>
 			</table>
+			</center>
 			<br>{{ info }}<br>
 			<form style="padding-top: 20px;" name="tarif" action="/cabinet/" method="POST">
 				<label for="type_tarif">Тариф:</label>
@@ -76,7 +78,10 @@
 				</select>
 				<button class="link" type="submit">Создать токен</button>
 			</form>
-			<br>{{ table }}<br>
+			<iframe style="border: 0px; width: 100%"
+					src="/render_cabinet_table/"
+					height="170">
+			</iframe>
 			<div style="padding-top: 30px;" id="logout" class="head_aut"> 
 				<a href="/logout/">Выход</a>
 			</div>

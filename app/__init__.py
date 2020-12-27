@@ -114,29 +114,16 @@ class ApiInformation(db.Model):
 
 class UserHistory(db.Model):
     __tablename__ = 'user_history'
-    id = db.Column(db.BigInteger(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)
     question = db.Column(db.Text(), nullable=False)
     answer = db.Column(db.Text(), nullable=False)
     proba = db.Column(db.Float(), nullable=False)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
     
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
     def __repr__(self):
 	    return "{}:{}".format(self.id,  self.question[:20])
-
-class AllHystory(db.Model):
-    __tablename__ = 'history'
-    id_query = db.Column(db.BigInteger(), primary_key=True)
-    question = db.Column(db.Text(), nullable=False)
-    answer = db.Column(db.Text(), nullable=False)
-    proba = db.Column(db.Float(), nullable=False)
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    def __repr__(self):
-	    return "{}:{}".format(self.id_query,  self.question[:20])
 # _________________________________________________________________________________________
 db.create_all()
 
@@ -144,7 +131,6 @@ TABLE = Table()
 TABLE_HISTORY = Table(columns=['Вопрос', 'Ответ', 'Вероятность','Время запроса'], max_size_rows=150, reverse_data=True)
 TABLE_INTERP = Table(columns=["Признак", "Название признака", "Значение признака", "Среднее значение по датасету"], with_dooble_click_script=False)
 TABLE_INTERP_TOP = Table(columns=["Признак", "Доля вклада","Признак", "Доля вклада"], with_dooble_click_script=False)
-TABLE_CABINET = Table(columns=["Key_api", "Осталось запросов вероятности","Осталось запросов вероятности по сслыке", "Осталось запросов интерпретации"], with_dooble_click_script=False)
 MAX_TOP_IMPACT = 5
 
 if flag_model:
