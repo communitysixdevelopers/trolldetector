@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from flask import request, render_template, make_response, jsonify, redirect, render_template_string
 from app import app_web, MODEL, interpretation, get_question_answers, interpretation_short, \
-    TABLE, TABLE_HISTORY, TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation, User, UserHistory, login_required, login_user, current_user, logout_user
+    TABLE_INTERP_TOP, TABLE_INTERP, db, ApiInformation, User, UserHistory, login_required, login_user, current_user, logout_user
 from datetime import datetime 
 
 FLAG_TABLE_LINK = -3
-FLAG_TABLE_HISTORY = 0
 LINK_COMMENT = ""
 
 def get_simple_table(data):
@@ -16,7 +15,7 @@ def get_simple_table(data):
             </head>
             <body>
                 <center>
-                <table class="table_prob">
+                <table border="1" class="table_prob">
                     <thead>
                         <tr style="text-align: left;">
                         <th></th>
@@ -35,6 +34,63 @@ def get_simple_table(data):
             '''
     for i, api in enumerate(data):
         str_table += "<tr><th>{}</th><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(i+1,api.api_key, api.tarif, api.counts_proba_left, api.counts_link_left, api.counts_interpr_left)
+    return str_.format(table=str_table)
+
+def get_table_history(data):
+    str_table = ""
+    str_ = '''<head>
+                <meta charset="utf-8">
+                <link rel="stylesheet" type="text/css" href="../../static/style_table.css"/>
+            </head>
+            <body>
+                <center>
+                <table border="1" class="table_prob">
+                    <thead>
+                        <tr style="text-align: left;">
+                        <th>№</th>
+                        <th>Вопрос</th>
+                        <th>Ответ</th>
+                        <th>Вероятность</th>
+                        <th>Время запроса</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table}
+                    </tbody>
+                    <script src="../../static/doubleClickRowTable.js"></script>
+                </center>
+            </body>
+            '''
+    for i, row in enumerate(data):
+        str_table += "<tr><th>{}</th><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(i+1, row.question, row.answer, row.proba, row.created_on)
+    return str_.format(table=str_table)
+    
+def get_table_link(data):
+    str_table = ""
+    str_ = '''<head>
+                <meta charset="utf-8">
+                <link rel="stylesheet" type="text/css" href="../../static/style_table.css"/>
+            </head>
+            <body>
+                <center>
+                <table border="1" class="table_prob">
+                    <thead>
+                        <tr style="text-align: left;">
+                        <th>№</th>
+                        <th>Вопрос</th>
+                        <th>Ответ</th>
+                        <th>Вероятность</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table}
+                    </tbody>
+                    <script src="../../static/doubleClickRowTable.js"></script>
+                </center>
+            </body>
+            '''
+    for i, row in enumerate(data):
+        str_table += "<tr><th>{}</th><td>{}</td><td>{}</td><td>{}</td></tr>".format(i+1, row.question, row.answer, row.proba)
     return str_.format(table=str_table)
 
 def get_list_pictures(proba=-1):
@@ -317,7 +373,7 @@ def registration():
         password_copy = request.form.get("password_copy")
         if password_copy != password:
             return render_template("registration.html", info="Пароли не совпадают")
-        user = User(email=email,  password='password')
+        user = User(email=email,  password='password', last_id_group_query=0)
         user_db = db.session.query(User).filter(User.email == email).first()
         if user_db:
             return render_template("registration.html", info="Пользователь по этому электроному адресу уже зарегистрирован")
@@ -345,19 +401,15 @@ def index():
 @app_web.route("/q_a/", methods=['GET', 'POST'])
 @login_required
 def q_a():
-    global FLAG_TABLE_HISTORY
     result = {}
     result["proba"] = ""
     result["smile"] = get_list_pictures()
     if request.method == "POST":
-        FLAG_TABLE_HISTORY = 1
         result["question"] = request.form.get("question")
         result["answer"] = request.form.get("answer")
         result["proba"] = MODEL.predict(result["question"],result["answer"])
         result["smile"] = get_list_pictures(result["proba"])
-        TABLE_HISTORY.add_row([result["question"], result["answer"], result["proba"], datetime.today().strftime("%Y-%m-%d_%H.%M.%S")])
-        TABLE_HISTORY.save_html(path='app/templates/table_history.html')
-        db.session.add(UserHistory(question=result["question"], answer=result["answer"], proba=result["proba"], users=current_user))
+        db.session.add(UserHistory(question=result["question"], answer=result["answer"], proba=result["proba"], users=current_user, id_group_query=0))
         db.session.commit()
     return render_template("index_question_answer.html", result=result)
 
@@ -366,7 +418,6 @@ def q_a():
 def link():
     global LINK_COMMENT
     global FLAG_TABLE_LINK
-    global FLAG_TABLE_HISTORY
     link_to_site = preprocess_link_answers_mail_ru(request.args.get("link_to_site"))
     data = parce_data_from_link_answers_mail_ru(link_to_site)
     if data["code"] == -3:
@@ -376,16 +427,14 @@ def link():
 
     if data["code"] < 0:
         return render_template("index_link.html")
-    FLAG_TABLE_HISTORY = 1
-    TABLE.clear_table()
+
+    current_user.last_id_group_query+=1
     for answer in data["answer"]:
         proba = MODEL.predict(data["question"], answer)
-        db.session.add(UserHistory(question=data["question"], answer=answer, proba=proba, users=current_user))
-        TABLE.add_row([data["question"], answer, proba])
-        TABLE_HISTORY.add_row([data["question"], answer, proba, datetime.today().strftime("%Y-%m-%d_%H.%M.%S")])
+        db.session.add(UserHistory(question=data["question"], answer=answer, proba=proba, users=current_user, id_group_query=current_user.last_id_group_query))
+
+    db.session.add(current_user)
     db.session.commit()
-    TABLE.save_html(path='app/templates/table.html')
-    TABLE_HISTORY.save_html(path='app/templates/table_history.html')
     return render_template("index_link.html")
 
 @app_web.route("/interpretation/", methods=['GET', 'POST'])
@@ -497,17 +546,18 @@ def form_interpretation():
 
 @app_web.route("/table_proba/", methods=['GET', 'POST']) 
 def table_proba():
+    data_hist = db.session.query(UserHistory).filter(UserHistory.user_id == current_user.id, UserHistory.id_group_query == current_user.last_id_group_query).all()
     global FLAG_TABLE_LINK
-    if FLAG_TABLE_LINK < 0:
+    if FLAG_TABLE_LINK < 0 or data_hist is None:
         return render_template("empty.html", text = LINK_COMMENT)
-    return render_template("table.html")
+    return render_template_string(get_table_link(data_hist))
     
-@app_web.route("/table_history/", methods=['GET', 'POST']) 
-def table_history():
-    data_hist = db.session.query(UserHistory).filter(UserHistory.user_id == current_user.id).all()
+@app_web.route("/table_history/<int:size>/", methods=['GET', 'POST']) 
+def table_history(size):
+    data_hist = db.session.query(UserHistory).filter(UserHistory.user_id == current_user.id).order_by(db.desc(UserHistory.id)).limit(size).all()
     if not data_hist:
         return render_template("empty.html", text = "Ещё нет истории запросов")
-    return render_template("table_history.html")
+    return render_template_string(get_table_history(data_hist))
 
 @app_web.route("/table_interpretation/", methods=['GET', 'POST']) 
 def table_interpretation():

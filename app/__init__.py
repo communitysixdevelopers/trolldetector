@@ -72,6 +72,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(), nullable=False)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_id_group_query = db.Column(db.Integer(), nullable=False)
     
     api = db.relationship('ApiInformation', backref='users')
     history = db.relationship('UserHistory', backref='users')
@@ -119,7 +120,8 @@ class UserHistory(db.Model):
     answer = db.Column(db.Text(), nullable=False)
     proba = db.Column(db.Float(), nullable=False)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    
+    id_group_query = db.Column(db.Integer(), nullable=False)
+
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
     def __repr__(self):
@@ -128,7 +130,6 @@ class UserHistory(db.Model):
 db.create_all()
 
 TABLE = Table()
-TABLE_HISTORY = Table(columns=['Вопрос', 'Ответ', 'Вероятность','Время запроса'], max_size_rows=150, reverse_data=True)
 TABLE_INTERP = Table(columns=["Признак", "Название признака", "Значение признака", "Среднее значение по датасету"], with_dooble_click_script=False)
 TABLE_INTERP_TOP = Table(columns=["Признак", "Доля вклада","Признак", "Доля вклада"], with_dooble_click_script=False)
 MAX_TOP_IMPACT = 5
@@ -277,7 +278,7 @@ else:
     MODEL = Test()
     def interpretation(question, answer):
         pass
-    def interpretation_short(question, answer):
+    def interpretation_short(question, answer, n_max_top):
         pass
     
 from app import views
