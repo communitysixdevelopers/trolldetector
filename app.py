@@ -15,6 +15,7 @@ if __name__ == "__main__":
       # Model warmup (ускоряет первый запуск)
       MODEL.predict(question="Вопрос", answer="Ответ")
       # Запуск базового сервера
+      # app_web.debug = True 
       app_web.run(host="0.0.0.0")
       #manager.run()
       """
