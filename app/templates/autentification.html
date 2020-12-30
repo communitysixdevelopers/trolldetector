@@ -16,33 +16,30 @@
 			<h1 class="name_service">Сервис по определению троллинга<br>в ответе на вопрос</h1>
 		</header>
 		<div class="content" style="text-align: center;">
-			<nav>
+			<!-- <nav>
 				<ul class="top-menu">
 					<li><a href="/q_a/"> Вопрос-ответ</a></li>
 					<li><a href="/link/">Поиск по ссылке</a></li>
 					<li><a href="/history/">История запросов</a></li>
 					<li><a href="/service/">О сервисе</a></li>
 				</ul>
-			</nav>
-			<form style="padding-top:30px;" name="login" action="/autentification/" method="post">
-				<div>
-					<label style="display: block;" for="username">Email</label>
-					<input type="email" id="username" name="email">
+			</nav> -->
+			<form style="padding-top:50px;" name="login" action="/autentification/" method="post">
+				<div style="padding-bottom: 15px;">
+					<label style="display: block; padding-bottom: 5px;" for="username">Email</label>
+					<input type="email" id="username" name="email" style="height: 30px; width: 250px; border-radius: 20px;">
 				</div>
-				
-				<div>
-					<label style="display: block;" for="pass">Пароль (минимум 8 символов):</label>
+				<div style="padding-bottom: 10px;">
+					<label style="display: block; padding-bottom: 5px;" for="pass">Пароль (минимум 8 символов):</label>
 					<input type="password" id="pass" name="password"
-							minlength="8" required>
-				</div>
-				<div style="padding-top: 10px;" id="div_aut" class="head_aut"> 
-					<a href="/registration/">Зарегистрироваться</a>
-				</div>
-				<div style="padding-top: 10px;" id="div_aut" class="head_aut"> 
-					<a href="/guest/">Войти как гость</a>
+							minlength="8" required style="height: 30px; width: 250px; border-radius: 20px;">
 				</div>
 				{{ info }}
 				<p><button name="submit">Войти</button></p>
+				<div style="padding-top: 10px; padding-bottom: 60px;" id="div_aut" class="head_aut"> 
+					<a style="padding-right: 20px;" href="/registration/">Зарегистрироваться</a>
+					<a href="/guest/">Войти как гость</a>
+				</div>
 		</div>
 		<footer class="footer">
 			<p style="padding-left: 20px;"><a href="https://made.mail.ru"></a><img src="../static/pic/made.svg"><br>

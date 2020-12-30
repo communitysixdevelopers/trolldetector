@@ -70,8 +70,8 @@
 			</center>
 			<br>{{ info }}<br>
 			<form style="padding-top: 20px;" name="tarif" action="/cabinet/" method="POST">
-				<label for="type_tarif">Тариф:</label>
-				<select style="height: 32px;" id="select_tarif" name="type_tarif" form="tarif">
+				<label for="type_tarif" style="margin-right: 10px;">Тариф:</label>
+				<select style="height: 45px; border-radius: 25px; width: 150px; margin-right: 10px; text-justify: auto;" id="select_tarif" name="type_tarif" form="tarif">
 					<option value="test">Тестовый</option>
 					<option value="base">Базовый</option>
 					<option value="premium">Премиум</option>
@@ -82,7 +82,7 @@
 					src="/render_cabinet_table/"
 					height="170">
 			</iframe>
-			<div style="padding-top: 30px;" id="logout" class="head_aut"> 
+			<div style="padding-top: 30px; padding-bottom: 30px;" id="logout" class="head_aut"> 
 				<a href="/logout/">Выход</a>
 			</div>
 		</div>

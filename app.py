@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from app import app_web, manager, MODEL
 
 import webbrowser

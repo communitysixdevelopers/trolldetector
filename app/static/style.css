@@ -40,8 +40,9 @@ body {
 
 .head_aut a {
 	color:  #000;
+	padding: 10px 10px 2px 10px;
 	text-decoration: none;
-	font-size: 18px;
+	font-size: 16px;
 }
 .head_aut a:hover {
 	padding: 10px 10px 2px 10px;
@@ -100,12 +101,12 @@ h1.name_service {
 input[type="text"].link {
 	background-color: #ffffff;
 	border: 1px solid #5a5a5a;
-	height: 30px;
+	height: 45px;
 	color: #3b3b3b;
 	padding: 0 10px;
 	font: 14px 'MyriadPro';
 	vertical-align: top;
-	border-radius: 15px;
+	border-radius: 25px;
 }
 input[type="text"].link:focus {
 	border: 1px solid #000000;
@@ -138,9 +139,9 @@ button {
 	background-color: #000;
 	border: 1px solid #5a5a5a;
 	padding: 0px 30px;
-	height: 40px;
-	border-radius: 20px;
-	font: bold 22px 'MyriadPro';
+	height: 45px;
+	border-radius: 25px;
+	font: 19px 'MyriadPro';
 }
 button:hover {
 	cursor: pointer;
@@ -151,9 +152,9 @@ button.link {
 	background-color: #000;
 	border: 1px solid #5a5a5a;
 	padding: 0px 30px;
-	height: 32px;
-	border-radius: 20px;
-	font: bold 22px 'MyriadPro';
+	height: 45px;
+	border-radius: 25px;
+	font: 19px 'MyriadPro';
 }
 button.link:hover {
 	cursor: pointer;

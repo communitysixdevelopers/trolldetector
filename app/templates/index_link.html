@@ -12,7 +12,7 @@
 		<header class="wrapper">
 			<h1 class="name_service">Сервис по определению троллинга<br>в ответе на вопрос</h1>
 		</header>
-		<div class="content" style="text-align: center;">
+		<div class="content" style="text-align: center; padding-bottom: 30px;">
 			<nav>
 				<ul class="top-menu">
 					<li><a href="/q_a/"> Вопрос-ответ</a></li>
@@ -22,10 +22,10 @@
 					<li><a href="/cabinet/">Личный кабинет</a></li>
 				</ul>
 			</nav>
-			<br>
-				<form name="search" action="/link/" method="get">
-					<label for="type_site">Портал:</label>
-					<select style="height: 32px;" id="select_site" name="type_site" form="search">
+			<form style="padding-top: 20px;" name="search" action="/link/" method="get">
+				<p>
+					<select style="height: 45px; border-radius: 25px; width: 150px; margin-right: 10px; text-justify: auto;" 
+						id="select_site" name="type_site" form="search">
 						<option value="answers_mail.ru">Ответы Mail.ru</option>
 						<option value="yandex_q" disabled>Яндекс Q</option>
 						<option value="thequestion.ru" disabled>The Question</option>
@@ -33,6 +33,7 @@
 						<option value="sprosi.xyz" disabled>Спроси.xyz</option>
 					</select>
 					<input class="link"
+					style="margin-right: 10px;"
 					autofocus
 					required 
 					type="text" 
@@ -41,12 +42,12 @@
 					placeholder="Пример: https://otvet.mail.ru/question/1234567 или 1234567"
 					size="60">
 					<button class="link" type="submit">Найти</button>
-				</form>
-			<p><i>Результаты</i></p>
+				</p>
+			</form>
 			<iframe 
-				style="border: 0px; width: 100%"
+				style="width: 95%; border: 0px; text-align: center;"
 				src="/table_proba/"
-				height="600">
+				height="550">
 			</iframe>
 		</div>
 		<footer></footer>
