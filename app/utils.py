@@ -9,7 +9,7 @@ def get_simple_table(data):
             </head>
             <body>
                 <center>
-                <table border="1" class="table_prob">
+                <table class="table_tarif_api">
                     <thead>
                         <tr style="text-align: left;">
                         <th></th>
@@ -38,7 +38,7 @@ def get_table_history(data):
             </head>
             <body>
                 <center>
-                <table border="1" class="table_prob">
+                <table class="table_prob">
                     <thead>
                         <tr style="text-align: left;">
                         <th>№</th>
@@ -48,7 +48,7 @@ def get_table_history(data):
                         <th>Время запроса</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody data-tooltip="Нажми двойной щелчок левой кнопки мыши, для интерпретации результатов строки">
                         {table}
                     </tbody>
                     <script src="../../static/doubleClickRowTable.js"></script>
@@ -67,7 +67,7 @@ def get_table_link(data):
             </head>
             <body>
                 <center>
-                <table border="1" class="table_prob">
+                <table class="table_prob">
                     <thead>
                         <tr style="text-align: left;">
                         <th>№</th>
@@ -76,7 +76,7 @@ def get_table_link(data):
                         <th>Вероятность</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody data-tooltip="Нажми двойной щелчок левой кнопки мыши, для интерпретации результатов строки">
                         {table}
                     </tbody>
                     <script src="../../static/doubleClickRowTable.js"></script>

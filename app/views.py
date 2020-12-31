@@ -76,7 +76,7 @@ def index():
 @login_required
 def q_a():
     result = {}
-    result["proba"] = ""
+    result["proba"] = 0
     result["smile"] = get_list_pictures()
     if request.method == "POST":
         result["question"] = request.form.get("question")

@@ -45,7 +45,11 @@
 					placeholder="Введите ответ">{{ result['answer'] }}</textarea>
 				</p>
 				<p><button name="submit">Проверить</button></p>
-				<p style="font: 22px 'MyriadPro;">{{ result['proba'] }}</p>
+				{% if result['proba']==0 %}
+					<p style="font: 22px 'MyriadPro;"><font color="#ffffff">{{ result['proba'] }}</font></p>
+				{% else %}
+					<p style="font: 22px 'MyriadPro;">{{ result['proba'] }}</p>
+				{% endif %}
 				<img src="{{ result['smile'][0] }}" height="5%" width="5%">
 				<img src="{{ result['smile'][1] }}" height="5%" width="5%">
 				<img src="{{ result['smile'][2] }}" height="5%" width="5%">

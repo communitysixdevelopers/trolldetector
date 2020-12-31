@@ -2,22 +2,33 @@
     font-size: 11pt; 
     font-family: Arial;
     border-collapse: collapse; 
-    border: 1px solid silver;
+    /* border: 1px solid silver; */
 
 }
 
-.table_prob td, th {
+.table_prob td, .table_prob th{
     padding: 5px;
 }
 
-.table_prob tr:nth-child(even) {
-    background: #E0E0E0;
+.table_prob thead th {
+    background: #71e0ae;
 }
 
+.table_prob thead th:hover {
+    cursor: default;
+}
+
+.table_prob tr:nth-child(even) {
+    background: #d2f4e4;
+}
+.table_prob tr:nth-child(odd) {
+    background: #f2fcfb;
+}
 .table_prob tr:hover {
-    background: silver;
+    background: #71e0ae;
     cursor: pointer;
 }
+
 
 .table_top {
     font-size: 11pt; 
@@ -26,7 +37,7 @@
     border: 1px solid silver;
 }
 
-.table_top td, th {
+.table_top td, .table_top th {
     padding: 5px;
 }
 
@@ -57,29 +68,93 @@
     font-size: 11pt; 
     font-family: Arial;
     border-collapse: collapse; 
-    border: 1px solid rgb(70, 70, 70);
+    /* border: 1px solid rgb(70, 70, 70); */
 }
 
-.table_tarif td, th {
+.table_tarif td, .table_tarif th {
     padding: 5px;
-    border: 1px solid rgb(70, 70, 70);
+    border-bottom: 2px solid rgb(255, 255, 255);
+    border-right: 2px solid rgb(255, 255, 255);
 }
 
-.table_tarif tr:hover {
-    border: 1px solid black;
-    background: #E0E0E0;
-    cursor: pointer;
+.table_tarif th, .table_tarif td {
+    text-align: center;
 }
-.table_tarif th {
+
+.table_tarif th:nth-child(1), .table_tarif td:nth-child(1) {
     text-align: left;
 }
+
+/* .table_tarif tr:nth-child(even) {
+    background: #000000;
+} */
+
+.table_tarif td:nth-child(1) {
+    background:#ebebeb;
+}
+
 .table_tarif td:nth-child(2) {
     background:#feccc0;
 }
+
 .table_tarif td:nth-child(3) {
     background:#fed5d7;
 }
 
 .table_tarif td:nth-child(4) {
     background:#ffc000;
+}
+
+.table_tarif_api {
+    font-size: 11pt; 
+    font-family: Arial;
+    border-collapse: collapse; 
+    /* border: 1px solid silver; */
+
+}
+
+.table_tarif_api td, .table_tarif_api th {
+    padding: 5px;
+}
+
+.table_tarif_api thead th {
+    background: #71e0ae;
+}
+
+.table_tarif_api tr:nth-child(even) {
+    background: #d2f4e4;
+}
+.table_tarif_api tr:nth-child(odd) {
+    background: #f2fcfb;
+}
+
+.table_tarif_api th, .table_tarif_api td {
+    text-align: center;
+}
+
+.table_tarif_api th:nth-child(1), .table_tarif_api td:nth-child(1) {
+    text-align: left;
+}
+
+[data-tooltip] {
+    position: relative; /* Относительное позиционирование */ 
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip); /* Выводим текст */
+    position: absolute; /*Абсолютное позиционирование */
+    width: 300px; /* Ширина подсказки */
+    left: 0; top: 0; /*Положение подсказки */
+    background: #3988c9e7; /* Синий цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 0.5em; /* Поля вокруг текста */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Параметры тени */
+    pointer-events: none; /* Подсказка */
+    opacity: 0; /* Подсказка невидима */
+    transition: 1s; /* Время появления подсказки */
+} 
+
+[data-tooltip]:hover::after {
+    opacity: 1; /* Показываем подсказку */
+    top: 2em; /* Положение подсказки */
 }
